@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0A0A12">
+<title>RooMail</title>
+<style>
+:root{--bg:#0A0A12;--tx:#F4F1EA;--mut:#8E8CA3;--line:rgba(255,255,255,.1);--s1:rgba(255,255,255,.045);--s2:rgba(255,255,255,.085);--co:#FF8A5B;--li:#A78BFA;--mi:#7CF0C8;--err:#FF6B81;--warn:#F5B94A;--surf:#13131e;--ab:.55;--serif:"Noto Serif","Source Serif 4",Georgia,"Times New Roman",serif;--f:Inter,"Google Sans",Roboto,"Segoe UI",system-ui,sans-serif;--mono:"JetBrains Mono",ui-monospace,"Roboto Mono",Menlo,monospace}
+[data-theme=amoled]{--bg:#000;--surf:#09090d;--ab:.3}
+[data-theme=light]{--bg:#F5F0E8;--tx:#1B1A22;--mut:#7B766A;--line:rgba(27,26,34,.13);--s1:rgba(255,255,255,.6);--s2:rgba(27,26,34,.06);--co:#E8613A;--li:#6D4DE8;--mi:#0E9F76;--surf:#fffaf2;--ab:.4}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--tx);font-family:var(--f)}
+body{overflow:hidden}button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
+svg.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.bg{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none}
+.bg i{position:absolute;border-radius:50%;opacity:var(--ab);will-change:transform;translate:calc(var(--mx,0) * 26px) calc(var(--my,0) * 26px)}
+.bg i:nth-child(1){width:90vmax;height:90vmax;right:-48vmax;top:-40vmax;background:radial-gradient(circle,var(--co),transparent 62%);animation:dr 20s ease-in-out infinite alternate}
+.bg i:nth-child(2){width:80vmax;height:80vmax;left:-50vmax;top:28vh;background:radial-gradient(circle,var(--li),transparent 62%);animation:dr 25s ease-in-out infinite alternate-reverse}
+.bg i:nth-child(3){width:60vmax;height:60vmax;right:-30vmax;bottom:-34vmax;opacity:calc(var(--ab) * .55);background:radial-gradient(circle,var(--mi),transparent 62%);animation:dr 30s ease-in-out infinite alternate}
+@keyframes dr{to{transform:translate(-10vmax,12vmax) scale(1.18) rotate(20deg)}}
+.bg::after{content:"";position:absolute;inset:0;opacity:.09;mix-blend-mode:overlay;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+#splash{position:fixed;inset:0;z-index:50;display:flex;flex-direction:column;align-items:center;justify-content:center;background:radial-gradient(circle at 70% 18%,#3a1d33,transparent 55%),radial-gradient(circle at 20% 80%,#231a4d,transparent 55%),#0A0A12;color:#F4F1EA;transition:opacity .7s,visibility .7s}
+#splash.fade{opacity:0;visibility:hidden}
+.draw{width:118px;height:90px;overflow:visible}.draw *{fill:none;stroke:url(#sg);stroke-width:3;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:1;stroke-dashoffset:1;animation:dw 1.5s cubic-bezier(.65,0,.35,1) forwards}.draw path{animation-delay:.5s}
+@keyframes dw{to{stroke-dashoffset:0}}
+#splash h1{margin:30px 0 6px;font-family:var(--serif);font-style:italic;font-weight:500;font-size:56px;letter-spacing:-.03em;display:flex;overflow:hidden;padding:0 4px 6px}
+#splash h1 span{display:inline-block;animation:up .9s cubic-bezier(.16,1,.3,1) both;animation-delay:calc(.9s + var(--i) * 70ms)}#splash h1 span:nth-child(n+4){color:#FF8A5B}
+@keyframes up{from{transform:translateY(110%) rotate(6deg);opacity:0}}
+#splash p{margin:0;font-size:12px;letter-spacing:.22em;text-transform:uppercase;color:#9a97b3;animation:up 1s 1.5s cubic-bezier(.16,1,.3,1) both}
+.bar{width:140px;height:2px;border-radius:2px;background:rgba(255,255,255,.12);margin-top:34px;overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#FF8A5B,#A78BFA);transition:width .35s;animation:fill 2.2s ease-out forwards}@keyframes fill{to{width:90%}}
+.sstat{margin-top:12px;font-size:10px;color:#6f6c88;letter-spacing:.2em;text-transform:uppercase}
+#app{position:relative;z-index:1;height:100%;display:flex;flex-direction:column;padding-top:env(safe-area-inset-top)}
+.top{display:flex;align-items:center;justify-content:space-between;padding:16px 22px 4px}
+.brand{font-family:var(--serif);font-style:italic;font-size:24px;letter-spacing:-.02em}.brand em{color:var(--co)}
+.health{display:inline-flex;align-items:center;gap:8px;padding:7px 12px;border-radius:30px;border:1px solid var(--line);background:var(--s1);font-family:var(--mono);font-size:11px;color:var(--mut)}
+.health::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--mut)}
+.health.online::before{background:var(--mi);box-shadow:0 0 0 0 var(--mi);animation:ping 2.4s infinite}.health.error::before,.health.offline::before{background:var(--err)}.health.reconnecting::before{background:var(--warn)}
+@keyframes ping{70%{box-shadow:0 0 0 7px transparent}}
+main{flex:1;overflow-y:auto;padding:6px 22px 140px;scrollbar-width:none}main::-webkit-scrollbar{display:none}
+.view{display:none}.view.on{display:block;animation:in .7s cubic-bezier(.16,1,.3,1)}
+@keyframes in{from{opacity:0;transform:translateY(18px)}}
+.eyebrow{font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--mut);font-weight:600}
+.disp{font-family:var(--serif);font-style:italic;font-weight:500;letter-spacing:-.03em;margin:6px 0}
+h1.disp{font-size:52px;line-height:1}h3.disp{font-size:30px}
+#addr{margin:14px 0 4px;line-height:1.05;word-break:break-all}
+#addr .u{display:block;font-family:var(--serif);font-size:42px;font-weight:500;letter-spacing:-.035em}
+#addr .d{display:block;font-family:var(--mono);font-size:15px;color:var(--co);margin-top:6px}
+#addr.pulse{font-family:var(--serif);font-style:italic;font-size:34px;color:var(--mut);animation:pl 1.4s ease-in-out infinite}@keyframes pl{50%{opacity:.35}}
+.hero.listen .eyebrow::before{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--co);margin-right:9px;vertical-align:1px;animation:breathe 2.4s ease-in-out infinite}
+@keyframes breathe{50%{transform:scale(1.9);opacity:.3}}
+.acts{display:flex;align-items:flex-start;gap:10px;margin-top:22px}
+.cta{flex:1;height:54px;border-radius:30px;background:var(--tx);color:var(--bg);font-weight:700;font-size:15px;letter-spacing:.01em;display:flex;align-items:center;justify-content:center;gap:9px;transition:transform .2s cubic-bezier(.16,1,.3,1)}
+.cta:active,.rb:active,.btn:active{transform:scale(.95)}
+.rb{display:flex;flex-direction:column;align-items:center;gap:5px;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--mut);font-weight:600;transition:transform .2s}
+.rb b{display:grid;place-items:center;width:54px;height:54px;border-radius:50%;border:1px solid var(--line);background:var(--s1);color:var(--tx)}
+.rb.sm{flex-direction:row;font-size:11px;gap:7px;padding:9px 14px;border-radius:30px;border:1px solid var(--line);background:var(--s1);color:var(--tx)}
+.spin svg{animation:rot .8s linear infinite}@keyframes rot{to{transform:rotate(360deg)}}
+button:disabled{opacity:.6}
+.sess{display:flex;align-items:center;gap:14px;margin-top:26px}
+#time{font-family:var(--serif);font-size:26px;font-variant-numeric:tabular-nums;min-width:68px}#time.low{color:var(--err)}
+.line{flex:1;height:3px;border-radius:3px;background:var(--s2);overflow:hidden}.line i{display:block;height:100%;width:100%;border-radius:3px;background:linear-gradient(90deg,var(--co),var(--li));transition:width 1s linear}
+.lnk{font-size:13px;font-weight:700;color:var(--co);padding:6px 0}
+.note,.small{font-size:12px;color:var(--mut);line-height:1.5}.note{margin:8px 0 0}.small{text-align:center;margin:18px 0 6px}
+.banner{display:flex;align-items:center;gap:8px;padding:12px 14px;border-radius:18px;margin:6px 0 10px;font-size:13px;background:var(--s2);border:1px solid var(--line)}.banner[hidden]{display:none}.banner span{flex:1}.banner.error,.banner.offline{border-color:var(--err)}.banner.reconnecting{border-color:var(--warn)}
+.sm{display:inline-flex;align-items:center;gap:6px;padding:9px 14px;border-radius:30px;background:var(--s2);font-weight:700;font-size:13px}
+.otpc{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:26px;padding:18px 20px;border-radius:26px;background:linear-gradient(135deg,color-mix(in srgb,var(--mi) 22%,transparent),color-mix(in srgb,var(--li) 16%,transparent));border:1px solid color-mix(in srgb,var(--mi) 45%,transparent);animation:in .7s cubic-bezier(.16,1,.3,1)}.otpc[hidden]{display:none}
+#qotpc{font-family:var(--serif);font-size:38px;letter-spacing:.06em;margin-top:2px}
+.ih{display:flex;align-items:baseline;justify-content:space-between;margin:34px 0 12px}.ih h3{margin:0}.ih em{font-style:normal;font-family:var(--mono);font-size:12px;color:var(--mut);margin-left:8px}
+.sr{display:flex;align-items:center;gap:10px;padding:0 16px;height:48px;border-radius:26px;background:var(--s1);border:1px solid var(--line);color:var(--mut)}
+.sr input{flex:1;background:none;border:0;outline:0;color:var(--tx);font:inherit;font-size:15px;min-width:0}
+.chips{display:flex;gap:18px;margin:14px 2px 2px}.chips button{padding:4px 0;font-size:13px;font-weight:600;color:var(--mut);border-bottom:2px solid transparent}.chips button.on{color:var(--tx);border-color:var(--co)}
+.msg{display:flex;gap:14px;padding:18px 2px;border-bottom:1px solid var(--line);cursor:pointer;animation:in .8s cubic-bezier(.16,1,.3,1) both;animation-delay:var(--d,0ms)}
+.msg:active{opacity:.6}
+.av{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;flex:none;font-family:var(--serif);font-style:italic;font-size:20px;background:hsl(var(--h) 70% 65% / .16);color:hsl(var(--h) 85% 72%);border:1px solid hsl(var(--h) 70% 65% / .3)}
+[data-theme=light] .av{color:hsl(var(--h) 60% 34%)}
+.mb{min-width:0;flex:1}.m1{display:flex;justify-content:space-between;gap:8px;font-size:12px;color:var(--mut)}.m1 b{color:var(--tx);font-size:15px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.m2{font-family:var(--serif);font-size:17px;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.m3{font-size:13px;color:var(--mut);margin-top:3px;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.tags{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:9px}.tag{font-style:normal;font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase}
+.t-ver{color:var(--li)}.t-not{color:var(--mi)}.t-pro{color:var(--warn)}.t-oth{color:var(--mut)}
+.otp{font-family:var(--mono);font-size:12px;font-weight:700;padding:5px 11px;border-radius:30px;border:1px solid var(--mi);color:var(--mi)}
+.dot{width:9px;height:9px;border-radius:50%;background:var(--co);flex:none;margin-top:6px;box-shadow:0 0 12px var(--co)}
+.priv .m2,.priv .m3,.priv .m1 b{filter:blur(6px)}
+.empty{text-align:center;color:var(--mut);padding:46px 10px;font-size:14px;line-height:1.5}.empty b{display:block;font-family:var(--serif);font-style:italic;font-weight:500;color:var(--tx);font-size:28px;margin:18px 0 6px}.empty p{margin:0}
+.radar{position:relative;width:84px;height:84px;margin:0 auto;display:grid;place-items:center;color:var(--co)}.radar svg{width:26px;height:26px}
+.radar i{position:absolute;inset:0;border-radius:50%;border:1px solid var(--co);opacity:0;animation:rd 3s ease-out infinite}.radar i:nth-child(2){animation-delay:1s}.radar i:nth-child(3){animation-delay:2s}
+@keyframes rd{from{transform:scale(.3);opacity:.8}to{transform:scale(1.35);opacity:0}}
+.back{display:flex;align-items:center;gap:6px;font-weight:700;font-size:14px;padding:6px 0;color:var(--co)}
+#dsub{font-family:var(--serif);font-size:32px;line-height:1.12;letter-spacing:-.03em;margin:14px 0}
+.who{display:flex;gap:12px;align-items:center;margin-bottom:16px}
+#dotp{width:100%;display:flex;align-items:center;justify-content:space-between;padding:18px 20px;border-radius:26px;margin-bottom:14px;text-align:left;background:linear-gradient(135deg,color-mix(in srgb,var(--mi) 22%,transparent),color-mix(in srgb,var(--li) 16%,transparent));border:1px solid color-mix(in srgb,var(--mi) 45%,transparent)}#dotp[hidden]{display:none}
+#dotpc{font-family:var(--serif);font-size:40px;letter-spacing:.07em}
+iframe{width:100%;height:52vh;border:0;border-radius:22px;background:#fff}
+.btn{flex:1;display:flex;align-items:center;justify-content:center;gap:8px;padding:15px;border-radius:30px;font-weight:700;font-size:14px;background:var(--s2);text-decoration:none;color:inherit;border:1px solid var(--line)}.btn.p{background:var(--tx);color:var(--bg);border-color:transparent}
+.dl{margin-top:16px;width:100%;color:var(--err)}
+.panel{border-top:1px solid var(--line)}.set{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 0;border-bottom:1px solid var(--line);font-weight:600;font-size:15px;width:100%;text-align:left}.set small{display:block;color:var(--mut);font-weight:500;font-size:12px;margin-top:3px}
+.seg{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}.seg button{padding:8px 13px;border-radius:30px;border:1px solid var(--line);font-size:12px;font-weight:700;color:var(--mut)}.seg button.on{background:var(--tx);color:var(--bg);border-color:transparent}
+.sw{width:52px;height:32px;border-radius:30px;background:var(--s2);border:1px solid var(--line);position:relative;transition:background .3s;flex:none}.sw::after{content:"";position:absolute;left:3px;top:3px;width:24px;height:24px;border-radius:50%;background:var(--tx);transition:transform .35s cubic-bezier(.3,1.5,.5,1)}.sw.on{background:var(--co)}.sw.on::after{transform:translateX(20px);background:#fff}
+.sec{margin-top:30px}.sec .eyebrow{margin-bottom:6px}
+.fld{width:100%;height:50px;border-radius:26px;background:var(--s1);border:1px solid var(--line);color:var(--tx);padding:0 18px;font:inherit;font-size:15px;outline:0}.fld:focus{border-color:var(--co)}
+.row{display:flex;gap:10px;margin-top:16px}
+.lead{font-family:var(--serif);font-size:19px;line-height:1.45;color:var(--mut);margin:10px 0 24px}
+.rows .r2{display:flex;justify-content:space-between;gap:12px;padding:15px 0;border-top:1px solid var(--line);font-size:14px}.rows .r2 span{color:var(--mut)}.rows .r2 b,.rows .r2 a{font-weight:600;color:var(--tx);text-align:right;word-break:break-all}.rows .r2 a{color:var(--co);text-decoration:none}
+.meta{margin-top:20px;text-align:center;font-family:var(--mono);font-size:11px;color:var(--mut);letter-spacing:.06em}
+.lkr{display:flex;align-items:center;gap:10px;padding:11px 0;border-top:1px solid var(--line)}.lkt{flex:1;min-width:0}.lkt small{display:block;color:var(--mut);font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.lkt small.warn{color:var(--warn)}
+pre#dout{white-space:pre-wrap;font-size:11px;font-family:var(--mono);background:var(--s2);padding:14px;border-radius:18px;word-break:break-all;max-height:50vh;overflow:auto;margin:14px 0}
+nav{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(16px + env(safe-area-inset-bottom));display:flex;padding:6px;border-radius:36px;background:color-mix(in srgb,var(--surf) 80%,transparent);border:1px solid var(--line);z-index:10;backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);box-shadow:0 16px 44px rgba(0,0,0,.45)}
+nav button{position:relative;z-index:1;display:flex;align-items:center;gap:8px;padding:14px 18px;border-radius:30px;font-weight:700;font-size:13px;color:var(--mut);transition:color .3s}nav button.on{color:var(--bg)}
+nav button span{display:inline-block;max-width:0;opacity:0;overflow:hidden;white-space:nowrap;transition:max-width .4s cubic-bezier(.16,1,.3,1),opacity .3s}nav button.on span{max-width:90px;opacity:1}nav.mini button.on span{max-width:0;opacity:0}nav.mini button{padding:14px 18px}
+#ind{position:absolute;left:0;top:6px;bottom:6px;border-radius:30px;background:var(--tx);transition:transform .45s cubic-bezier(.3,1.25,.5,1),width .4s cubic-bezier(.16,1,.3,1)}
+#qrm{position:fixed;inset:0;z-index:30;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.72);padding:24px}#qrm.on{display:flex;animation:in .4s}
+.qb{background:var(--surf);border:1px solid var(--line);border-radius:32px;padding:24px;text-align:center;width:100%;max-width:340px}
+#qrc{border-radius:18px;width:240px;height:240px;image-rendering:pixelated;max-width:100%}.qb p{font-family:var(--mono);font-size:12px;word-break:break-all;margin:14px 0 4px;color:var(--mut)}
+.toast{position:fixed;left:50%;bottom:calc(96px + env(safe-area-inset-bottom));transform:translateX(-50%);max-width:88%;padding:13px 20px;border-radius:30px;background:var(--tx);color:var(--bg);font-size:14px;font-weight:600;box-shadow:0 12px 34px rgba(0,0,0,.4);opacity:0;pointer-events:none;z-index:40;text-align:center}
+.toast.error{background:var(--err);color:#fff}.toast.in{animation:toastIn .4s cubic-bezier(.16,1,.3,1) forwards}.toast.out{animation:toastOut .3s forwards}
+@keyframes toastIn{from{opacity:0;transform:translate(-50%,24px) scale(.9)}to{opacity:1;transform:translate(-50%,0) scale(1)}}@keyframes toastOut{from{opacity:1;transform:translate(-50%,0)}to{opacity:0;transform:translate(-50%,16px)}}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}}
+
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><linearGradient id="sg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FF8A5B"/><stop offset="1" stop-color="#A78BFA"/></linearGradient></defs>
+<symbol id="i-refresh" viewBox="0 0 24 24"><path d="M20 11a8 8 0 10-2.3 5.7M20 4v7h-7"/></symbol>
+<symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></symbol>
+<symbol id="i-copy" viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 012-2h10"/></symbol>
+<symbol id="i-mail" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="M3 7l9 6 9-6"/></symbol>
+<symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></symbol>
+<symbol id="i-back" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></symbol>
+<symbol id="i-inbox" viewBox="0 0 24 24"><path d="M3 13l3-8h12l3 8v6H3zM3 13h5l1 3h6l1-3h5"/></symbol>
+<symbol id="i-qr" viewBox="0 0 24 24"><path d="M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h3v3h-3zM20 14v3M14 20h3M20 20h1"/></symbol>
+<symbol id="i-set" viewBox="0 0 24 24"><path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="17" r="2"/></symbol>
+<symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></symbol>
+</svg>
+<div class="bg"><i></i><i></i><i></i></div>
+<div id="splash">
+  <svg class="draw" viewBox="0 0 120 90" aria-hidden="true"><rect x="6" y="8" width="108" height="72" rx="16" pathLength="1"/><path d="M12 22l48 34 48-34" pathLength="1"/></svg>
+  <h1 aria-label="RooMail"><span style="--i:0">R</span><span style="--i:1">o</span><span style="--i:2">o</span><span style="--i:3">M</span><span style="--i:4">a</span><span style="--i:5">i</span><span style="--i:6">l</span></h1>
+  <p>Disposable inbox · Zero signup</p>
+  <div class="bar"><i id="sbar"></i></div>
+  <div class="sstat" role="status">Opening your inbox</div>
+</div>
+<div id="app">
+  <div class="top"><div class="brand">Roo<em>Mail</em></div><div class="health" id="health">Starting</div></div>
+  <main>
+    <section class="view on" id="v-home">
+      <div class="banner" id="banner" hidden role="status"><span id="btxt"></span><button class="sm" id="bretry">Retry</button><button class="sm" id="bdiag">Why?</button></div>
+      <div class="hero" id="hero">
+        <div class="eyebrow">Your inbox · for now</div>
+        <div id="addr" class="pulse">Making your address…</div>
+        <div class="acts">
+          <button class="cta" id="copy"><svg class="i"><use href="#i-copy"/></svg>Copy</button>
+          <button class="rb" id="qr" aria-label="Show QR code"><b><svg class="i"><use href="#i-qr"/></svg></b>QR</button>
+          <button class="rb" id="chg" aria-label="New address"><b><svg class="i"><use href="#i-refresh"/></svg></b>New</button>
+          <button class="rb" id="del" aria-label="Delete inbox"><b><svg class="i"><use href="#i-trash"/></svg></b>Drop</button>
+        </div>
+        <div class="sess"><span id="time">10:00</span><div class="line"><i id="ring"></i></div><button class="lnk" id="ext">+ Extend</button></div>
+        <p class="note">This countdown is a reminder kept on your phone. Mail.tm decides how long the inbox really lives.</p>
+      </div>
+      <div class="otpc" id="qotp" hidden><div style="min-width:0"><div class="eyebrow">Code spotted</div><div id="qotpc"></div><div id="qotps" class="note" style="margin:2px 0 0"></div></div><button class="btn p" id="qotpb" style="flex:none;padding:14px 20px">Copy</button></div>
+      <div class="ih"><h3 class="disp">Messages<em id="cnt"></em></h3><button class="rb sm" id="ref"><svg class="i" style="width:16px;height:16px"><use href="#i-refresh"/></svg>Refresh</button></div>
+      <label class="sr"><svg class="i" style="width:18px;height:18px"><use href="#i-search"/></svg><input id="q" type="search" placeholder="Search sender or subject" autocomplete="off"></label>
+      <div class="chips"><button class="on" data-f="all">All</button><button data-f="unread">Unread</button><button data-f="codes">Codes</button></div>
+      <div id="list"></div>
+    </section>
+    <section class="view" id="v-detail">
+      <button class="back" id="back"><svg class="i"><use href="#i-back"/></svg>Messages</button>
+      <div id="dsub"></div>
+      <div class="who"><div class="av" id="dav" style="--h:260"></div><div class="mb"><b id="dname"></b><div class="m1"><span id="dfrom" style="overflow:hidden;text-overflow:ellipsis"></span><span id="dtime"></span></div></div></div>
+      <button id="dotp" hidden><span><span class="eyebrow">Verification code</span><br><small style="color:var(--mut)">Tap to copy</small></span><span id="dotpc"></span></button>
+      <div id="dlinks" hidden style="margin-bottom:16px"><div class="eyebrow" style="margin-bottom:4px">Links inside</div><div id="dll"></div></div>
+      <div id="dbody"></div>
+      <button class="btn dl" id="dmsg"><svg class="i"><use href="#i-trash"/></svg>Delete message</button>
+    </section>
+    <section class="view" id="v-settings">
+      <h1 class="disp" style="margin-top:8px">Settings</h1>
+      <div class="sec"><div class="eyebrow">Look &amp; feel</div><div class="panel">
+        <div class="set"><div>Theme</div><div class="seg"><button data-th="dark">Midnight</button><button data-th="amoled">Black</button><button data-th="light">Paper</button></div></div>
+        <div class="set"><div>Session reminder<small>Minutes on the countdown</small></div><div class="seg"><button data-sess="10">10</button><button data-sess="20">20</button><button data-sess="30">30</button><button data-sess="60">60</button></div></div>
+        <div class="set"><div>Privacy blur<small>Hides previews and the name part</small></div><button class="sw" id="privsw" role="switch" aria-checked="false" aria-label="Privacy blur"></button></div></div></div>
+      <div class="sec"><div class="eyebrow">New inbox</div>
+        <input class="fld" id="cpre" placeholder="Pick a name (optional)" maxlength="24" autocapitalize="off" autocomplete="off" spellcheck="false">
+        <select class="fld" id="cdom" style="margin-top:10px"><option value="">Any domain</option></select>
+        <p class="note">3–24 letters, numbers, dot, dash. The name may already be taken.</p>
+        <button class="btn p" id="cmk" style="width:100%;margin-top:12px;flex:none">Create inbox</button></div>
+      <div class="sec"><div class="eyebrow">Tools</div><div class="panel">
+        <button class="set" id="opendiag"><span>Connection check<small>See exactly why mail will not load</small></span></button>
+        <button class="set" id="nuke" style="color:var(--err)"><span>Nuke everything<small>Delete the inbox and wipe this app's data</small></span></button>
+        <button class="set" id="clr"><span>Reset settings<small>Theme, reminder length, privacy blur</small></span></button></div></div>
+    </section>
+    <section class="view about" id="v-about">
+      <div class="eyebrow" style="margin-top:10px">About</div>
+      <h1 class="disp">RooMail</h1>
+      <p class="lead">A calm little inbox for the emails you would rather not keep.</p>
+      <div class="rows">
+        <div class="r2"><span>Version</span><b id="ver">4.0.0</b></div>
+        <div class="r2"><span>Developer</span><b>Roohu</b></div>
+        <div class="r2"><span>Mail service</span><a href="https://mail.tm" target="_blank" rel="noopener noreferrer">Mail.tm ↗</a></div>
+        <div class="r2"><span>Support</span><b>roohukhan01@gmail.com</b></div>
+      </div>
+      <p class="note" style="margin-top:18px">Privacy: RooMail asks the free Mail.tm service to make inboxes and hold your mail. This phone keeps only your settings. Email text is shown in a locked box, so scripts, pictures and links do not run. This is not a promise of anonymity.</p>
+      <div class="row"><a class="btn p" href="mailto:roohukhan01@gmail.com?subject=RooMail%20support">Contact support</a><button class="btn" id="copyMail">Copy email</button></div>
+      <div class="meta" id="ver3"></div>
+      <div class="small">© 2026 Roohu. All rights reserved.</div>
+    </section>
+    <section class="view" id="v-diag">
+      <button class="back" id="dback"><svg class="i"><use href="#i-back"/></svg>Settings</button>
+      <h1 class="disp" style="font-size:38px">Connection check</h1>
+      <p class="note">This report has no password, token, email address or message text. It is safe to send to the developer.</p>
+      <pre id="dout"></pre><div class="row" style="margin-top:0"><button class="btn p" id="runtest">Run test</button><button class="btn" id="copydiag">Copy report</button></div>
+    </section>
+  </main>
+  <nav><span id="ind"></span>
+    <button class="on" data-v="home"><svg class="i"><use href="#i-inbox"/></svg><span>Inbox</span></button>
+    <button data-v="settings"><svg class="i"><use href="#i-set"/></svg><span>Settings</span></button>
+    <button data-v="about"><svg class="i"><use href="#i-info"/></svg><span>About</span></button>
+  </nav>
+</div>
+<div id="qrm"><div class="qb"><div class="eyebrow" style="margin-bottom:14px">Scan to get this address</div><canvas id="qrc" width="240" height="240"></canvas><p id="qra"></p>
+  <div class="row"><button class="btn p" id="qrcp">Copy</button><button class="btn" id="qrx">Close</button></div></div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+'use strict';
+var API='https://api.mail.tm',LIFE=600000,VER='4.0.0',CIRC=2*Math.PI*28;
+var $=function(id){return document.getElementById(id);};
+var S={domains:[],wantPre:'',wantDom:'',ms:0,q:'',flt:'all',priv:false,shown:'',addr:'',token:'',accId:'',msgs:[],exp:0,expired:false,poll:null,busy:false,openId:null,lastCount:0,err:false,errInfo:null,errStep:'',gen:0,ctl:null,refreshing:false,net:'online'};
+var LOG=[];
+var store={get:function(k){try{return localStorage.getItem(k);}catch(e){return null;}},set:function(k,v){try{localStorage.setItem(k,v);}catch(e){}}};
+
+function escapeHTML(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+function formatDate(d){var t=new Date(d).getTime();if(isNaN(t))return '';var s=Math.max(0,Math.floor((Date.now()-t)/1000));if(s<60)return 'Just now';var m=Math.floor(s/60);if(m<60)return m+' min ago';var h=Math.floor(m/60);if(h<24)return h+'h ago';return Math.floor(h/24)+'d ago';}
+function fmt(ms){var s=Math.max(0,Math.ceil(ms/1000));return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0');}
+function rand(n){var c='abcdefghijklmnopqrstuvwxyz0123456789',o='',a=new Uint32Array(n);(window.crypto||{getRandomValues:function(x){for(var i=0;i<x.length;i++)x[i]=Math.random()*4294967296;}}).getRandomValues(a);for(var i=0;i<n;i++)o+=c[a[i]%c.length];return o;}
+
+var toastT;
+function showToast(msg,type){if(type==='success')buzz();var t=$('toast');t.textContent=msg;t.className='toast';void t.offsetWidth;t.className='toast in '+(type||'');clearTimeout(toastT);toastT=setTimeout(function(){t.className='toast out '+(type||'');},3000);}
+function showSpinner(b){if(!b)return function(){};b.disabled=true;b.classList.add('spin');return function(){b.disabled=false;b.classList.remove('spin');};}
+
+var ERR={auth:'Session was not accepted.',rate:'Too many requests. Wait a little, then retry.',server:'The mail service has a problem. Try again soon.',http:'Unexpected reply from the mail service.',timeout:'The mail service took too long to answer.',offline:'Your phone looks offline. Check Wi-Fi or mobile data.',network:'Could not reach the mail service. Cause may be network block, DNS, TLS or app network rules.',notfound:'Item not found.',rejected:'The mail service rejected this address (taken or not allowed).'};
+function classify(e,status){var k;
+  if(status){k=(status===401||status===403)?'auth':status===404?'notfound':status===422?'rejected':status===429?'rate':status>=500?'server':'http';return {kind:k,msg:ERR[k]+' (code '+status+')'};}
+  if(e&&e.name==='TimeoutError')k='timeout';else if(e&&e.name==='AbortError')k='aborted';else if(typeof navigator!=='undefined'&&navigator.onLine===false)k='offline';else k='network';
+  return {kind:k,msg:ERR[k]||''};}
+function log(m,o){o.t=new Date().toISOString().slice(11,19);o.step=m;LOG.push(o);if(LOG.length>30)LOG.shift();}
+function mkErr(n){var e=new Error(n);e.name=n==='timeout'?'TimeoutError':'AbortError';return e;}
+function sleep(ms,sig){return new Promise(function(res,rej){var t=setTimeout(res,ms);if(sig)sig.addEventListener('abort',function(){clearTimeout(t);rej(mkErr('aborted'));});});}
+function backoff(n){return Math.min(8000,600*Math.pow(2,n))+Math.random()*400;}
+function mkRes(status,data,hd){var d=data;if(typeof d==='string'){try{d=JSON.parse(d);}catch(e){}}return {ok:status>=200&&status<300,status:status,headers:{get:function(k){if(!hd)return null;for(var x in hd)if(x.toLowerCase()===String(k).toLowerCase())return hd[x];return null;}},json:async function(){return d;}};}
+async function viaNative(path,o,h,ms){var P=window.Capacitor&&window.Capacitor.Plugins&&window.Capacitor.Plugins.CapacitorHttp;if(!P||!P.request)return null;
+  var r=await P.request({url:API+path,method:o.method||'GET',headers:h,data:o.body||undefined,connectTimeout:ms,readTimeout:ms});return mkRes(r.status,r.data,r.headers);}
+async function once(path,o){
+  var c=new AbortController(),sig=o.signal,tm,ms=o.timeout||12000;
+  if(sig&&sig.aborted)throw mkErr('aborted');
+  var h={'Accept':'application/json'};if(o.body)h['Content-Type']='application/json';if(o.auth&&S.token)h.Authorization='Bearer '+S.token;
+  var guards=[new Promise(function(_,rej){tm=setTimeout(function(){c.abort();rej(mkErr('timeout'));},ms+1500);})];
+  if(sig)guards.push(new Promise(function(_,rej){sig.addEventListener('abort',function(){c.abort();rej(mkErr('aborted'));});}));
+  async function go(){var nr=null,ne='';try{nr=await viaNative(path,o,h,ms);}catch(e){ne=String(e&&e.message||e);}
+    if(nr){o._tr='native';return nr;}
+    o._tr='web';var wf=window.CapacitorWebFetch||fetch;
+    try{return await wf.call(window,API+path,{method:o.method||'GET',headers:h,body:o.body?JSON.stringify(o.body):undefined,signal:c.signal});}
+    catch(e2){var e3=new Error((ne?'native: '+ne+' | ':'')+'web: '+(e2&&e2.message));e3.name=(e2&&e2.name)||'Error';throw e3;}}
+  try{return await Promise.race([go()].concat(guards));}finally{clearTimeout(tm);}}
+async function request(path,o){
+  o=o||{};var max=o.retries==null?2:o.retries,n=0,t0,lp=path.split('?')[0].replace(/\/[0-9a-zA-Z]{12,}/g,'/:id');
+  for(;;){t0=Date.now();
+    try{var r=await once(path,o);log(o.method||'GET',{path:lp,status:r.status,ms:Date.now()-t0,tr:o._tr});S.ms=Date.now()-t0;updHealth();
+      if((r.status===429||(r.status>=500&&o.safe))&&n<max){var ra=parseInt(r.headers&&r.headers.get&&r.headers.get('Retry-After'),10);var d=ra>0?Math.min(ra,15)*1000:backoff(n);n++;setStatus('reconnecting');await sleep(d,o.signal);continue;}
+      return r;
+    }catch(e){var k=classify(e).kind;log(o.method||'GET',{path:lp,err:k,ms:Date.now()-t0,tr:o._tr,msg:String(e&&e.message||'').replace(/[\w.+-]+@[\w.-]+/g,'…').slice(0,140)});
+      if(k==='aborted')throw e;
+      if(o.safe&&n<max){n++;setStatus('reconnecting');await sleep(backoff(n-1),o.signal);continue;}
+      throw e;}}}
+function api(path,o){o=o||{};if(o.safe==null)o.safe=(!o.method||o.method==='GET'||path==='/token');if(!o.signal&&S.ctl)o.signal=S.ctl.signal;return request(path,o);}
+function setStatus(k,msg){S.net=k;updHealth();var b=$('banner');if(k==='online'){b.hidden=true;return;}b.hidden=false;b.className='banner '+k;$('btxt').textContent=msg||({offline:'You are offline. New mail cannot arrive until you reconnect.',reconnecting:'Reconnecting…'}[k]||'Connection problem.');}
+function httpErr(r,step){var e=new Error(step+' '+r.status);e.status=r.status;e.step=step;return e;}
+function diagText(extra){
+  var L=['RooMail diagnostics v'+VER,'Time: '+new Date().toISOString(),'Online flag: '+(typeof navigator!=='undefined'?navigator.onLine:'?'),'Platform: '+((window.Capacitor&&window.Capacitor.getPlatform&&window.Capacitor.getPlatform())||'web'),'Status: '+S.net+(S.errStep?' (failed step: '+S.errStep+')':''),'Inbox active: '+!!S.token,''];
+  if(extra){L.push(extra);L.push('');}
+  L.push('Recent requests:');LOG.forEach(function(x){L.push(x.t+' '+x.step+' '+x.path+' '+(x.status!=null?x.status:x.err+(x.msg?' ['+x.msg+']':''))+' '+x.ms+'ms'+(x.tr?' via '+x.tr:''));});
+  L.push('','Note: this report has no password, token, email address or message text.');return L.join('\n');}
+function showDiag(extra){$('dout').textContent=diagText(extra);}
+async function runTest(btn){var done=showSpinner(btn),t0=Date.now(),res;
+  try{var r=await request('/domains?page=1',{retries:0,timeout:8000,safe:true});res='Test: mail service replied code '+r.status+' in '+(Date.now()-t0)+'ms';}
+  catch(e){var i=classify(e);res='Test failed ('+i.kind+'): '+i.msg+' The phone engine does not tell if the cause is DNS, TLS, CORS or a blocked network.';}
+  showDiag(res);done();}
+
+function stopPoll(){if(S.poll){clearInterval(S.poll);S.poll=null;}}
+function startPoll(){stopPoll();S.poll=setInterval(function(){if(!document.hidden)checkInbox();},10000);}
+
+async function getNewEmail(btn){
+  if(S.busy)return;S.busy=true;var done=showSpinner(btn);
+  if(S.ctl)S.ctl.abort();S.ctl=new AbortController();var gen=++S.gen,step='domains';
+  stopPoll();S.addr='';S.token='';S.accId='';S.msgs=[];S.lastCount=0;S.err=false;S.errInfo=null;S.errStep='';setAddr('Creating...',true);renderList();setStatus('online');
+  try{
+    var dr=await api('/domains?page=1');if(!dr.ok)throw httpErr(dr,step);
+    var dj=await dr.json();var list=dj['hydra:member']||dj.member||[];
+    S.domains=list.filter(function(x){return x.isActive!==false&&x.isPrivate!==true;}).map(function(x){return x.domain;});fillDomains();var dom=(S.wantDom&&S.domains.indexOf(S.wantDom)>=0)?S.wantDom:(S.domains[0]||(list[0]||{}).domain);if(!dom)throw new Error('no domain');
+    step='account';var pass=rand(18)+'Aa1',addr,acc=null,tries=0;
+    while(!acc&&tries<3){tries++;addr=((S.wantPre&&tries===1)?S.wantPre:'roo'+rand(9))+'@'+dom;
+      var r=await api('/accounts',{method:'POST',body:{address:addr,password:pass}});
+      if(r.status===201||r.ok){acc=await r.json();}else if(r.status!==422||S.wantPre){throw httpErr(r,step);}}
+    if(!acc)throw httpErr({status:422},step);
+    step='token';var tr=await api('/token',{method:'POST',body:{address:addr,password:pass}});if(!tr.ok)throw httpErr(tr,step);
+    var tj=await tr.json();if(gen!==S.gen)return;
+    S.wantPre='';S.addr=addr;S.token=tj.token;S.accId=acc.id||tj.id;S.exp=Date.now()+LIFE;S.expired=false;
+    setAddr(addr);renderList();tick();startPoll();setStatus('online');showToast('Fresh inbox ready','success');setTimeout(function(){checkInbox();},1200);
+  }catch(e){
+    if(e&&e.name==='AbortError')return;
+    S.wantPre='';var info=classify(e,e&&e.status);S.err=true;S.errInfo=info;S.errStep=step;setAddr('Could not connect');renderList();
+    setStatus(info.kind==='offline'?'offline':'error',info.msg);showToast(info.msg,'error');
+  }finally{S.busy=false;done();}
+}
+async function deleteMail(btn){
+  if(S.busy)return;
+  if(S.accId&&S.token){try{await api('/accounts/'+S.accId,{method:'DELETE',auth:true});}catch(e){}}
+  await getNewEmail(btn);
+}
+async function checkInbox(btn,manual){
+  if(!S.token){if(manual)showToast('No email yet. Tap Change Mail.','error');return;}
+  if(S.refreshing)return;S.refreshing=true;var gen=S.gen,done=showSpinner(btn);
+  try{
+    var r=await api('/messages?page=1',{auth:true,retries:1});
+    if(gen!==S.gen)return;
+    if(r.status===401){showToast('Session ended. Making a new email...','error');return getNewEmail();}
+    if(!r.ok)throw httpErr(r,'messages');
+    var j=await r.json();var m=j['hydra:member']||j.member||[];
+    m.sort(function(a,b){return new Date(b.createdAt)-new Date(a.createdAt);});
+    if(!manual&&m.length>S.msgs.length)showToast('New message arrived','success');
+    S.msgs=m;S.lastCount=m.length;renderList();setStatus('online');if(manual)showToast('Up to date','success');
+  }catch(e){if(e&&e.name==='AbortError')return;var info=classify(e,e&&e.status);setStatus(info.kind==='offline'?'offline':'error',info.msg);if(manual)showToast(info.msg,'error');}
+  finally{S.refreshing=false;done();}
+}
+async function openEmail(id){
+  S.openId=id;show('detail');$('dotp').hidden=true;$('dlinks').hidden=true;$('dsub').textContent='Loading...';$('dbody').innerHTML='';
+  try{
+    var r=await api('/messages/'+encodeURIComponent(id),{auth:true});
+    if(r.status===401){show('home');return getNewEmail();}
+    if(!r.ok)throw new Error('msg '+r.status);
+    var m=await r.json();var f=m.from||{};var n=f.name||f.address||'Unknown';
+    $('dsub').textContent=m.subject||'(no subject)';$('dav').textContent=n.charAt(0).toUpperCase();
+    $('dname').textContent=n;$('dfrom').textContent=f.address||'';$('dtime').textContent=formatDate(m.createdAt);var code=findOtp(m.text||(Array.isArray(m.html)?m.html.join(' '):(m.html||'')).replace(/<style[\s\S]*?<\/style>|<[^>]+>/g,' '));var oc=$('dotp');oc.hidden=!code;if(code){oc.dataset.code=code;$('dotpc').textContent=code;}renderLinks(extractLinks((Array.isArray(m.html)?m.html.join(' '):(m.html||''))+' '+(m.text||'')));
+    var html=Array.isArray(m.html)?m.html.join(''):(m.html||'');
+    var body=html||'<pre style="white-space:pre-wrap;font-family:inherit">'+escapeHTML(m.text||'')+'</pre>';
+    var doc='<meta http-equiv="Content-Security-Policy" content="default-src \'none\'; style-src \'unsafe-inline\'; img-src data:"><style>body{font-family:sans-serif;margin:12px;color:#111;background:#fff;word-break:break-word}img{max-width:100%}</style>'+body;
+    var fr=document.createElement('iframe');fr.setAttribute('sandbox','');fr.srcdoc=doc;$('dbody').innerHTML='';$('dbody').appendChild(fr);
+    var x=S.msgs.filter(function(q){return q.id===id;})[0];if(x)x.seen=true;renderList();
+  }catch(e){$('dsub').textContent='Could not open this email';showToast('Could not load message.','error');}
+}
+async function deleteMessage(btn){
+  var id=S.openId;if(!id)return;var done=showSpinner(btn);
+  try{var r=await api('/messages/'+encodeURIComponent(id),{method:'DELETE',auth:true});
+    if(!r.ok&&r.status!==404)throw new Error('del '+r.status);
+    S.msgs=S.msgs.filter(function(m){return m.id!==id;});S.lastCount=S.msgs.length;renderList();show('home');showToast('Message deleted','success');
+  }catch(e){showToast('Could not delete message.','error');}finally{done();}
+}
+function copyText(t,msg){
+  function fb(){try{var a=document.createElement('textarea');a.value=t;a.style.position='fixed';a.style.opacity='0';document.body.appendChild(a);a.select();var ok=document.execCommand('copy');document.body.removeChild(a);showToast(ok?msg:'Copy failed',ok?'success':'error');}catch(e){showToast('Copy failed','error');}}
+  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(t).then(function(){showToast(msg,'success');},fb);}else fb();
+}
+function copyToClipboard(){if(!S.addr){showToast('No email to copy yet','error');return;}copyText(S.addr,'Address copied');}
+
+var CATN={ver:'Verification',not:'Notifications',pro:'Promotions',oth:'Other'};
+function category(s,i){var t=(s||'')+' '+(i||'');
+  if(/\b(code|otp|verify|verification|confirm|password|reset|sign.?in|log.?in|security)\b/i.test(t))return 'ver';
+  if(/\b(sale|% off|discount|offer|deal|newsletter|unsubscribe|promo|coupon)\b/i.test(t))return 'pro';
+  if(/\b(notification|alert|update|receipt|invoice|order|shipped|delivery|reminder)\b/i.test(t))return 'not';return 'oth';}
+function findOtp(t){t=String(t||'').replace(/\s+/g,' ');var m;
+  m=t.match(/\b(?:code|otp|pin|passcode|verification|verify|token)\b\D{0,25}?\b(\d{4,8})\b/i);if(m)return m[1];
+  m=t.match(/\b(\d{3})[- ](\d{3})\b/);if(m&&/\b(code|otp|verify|verification)\b/i.test(t))return m[1]+m[2];
+  m=t.match(/\b(\d{6})\b/);if(m&&/\b(code|otp|verify|verification|confirm)\b/i.test(t)&&!/^(19|20)\d{4}$/.test(m[1]))return m[1];
+  return null;}
+function qrMatrix(text){
+  var b=[],i,j;for(i=0;i<text.length;i++){if(text.charCodeAt(i)>127)return null;b.push(text.charCodeAt(i));}
+  var caps=[17,32,53,78],dcs=[19,34,55,80],ecs=[7,10,15,20],ver=0;while(ver<4&&b.length>caps[ver])ver++;if(ver>=4)return null;
+  var V=ver+1,N=17+4*V,dc=dcs[ver],ec=ecs[ver],bits=[];
+  function put(v,n){for(var k=n-1;k>=0;k--)bits.push((v>>k)&1);}
+  put(4,4);put(b.length,8);b.forEach(function(x){put(x,8);});put(0,Math.min(4,dc*8-bits.length));while(bits.length%8)bits.push(0);
+  var data=[];for(i=0;i<bits.length;i+=8){var v=0;for(j=0;j<8;j++)v=v*2+bits[i+j];data.push(v);}
+  for(var p=0;data.length<dc;p++)data.push(p%2?17:236);
+  var ex=[],lg=[],x=1;for(i=0;i<255;i++){ex[i]=x;lg[x]=i;x<<=1;if(x&256)x^=285;}for(i=255;i<512;i++)ex[i]=ex[i-255];
+  function mul(a,c){return a&&c?ex[lg[a]+lg[c]]:0;}
+  var g=[1];for(i=0;i<ec;i++){var ng=[];for(j=0;j<=g.length;j++)ng.push(0);for(j=0;j<g.length;j++){ng[j]^=g[j];ng[j+1]^=mul(g[j],ex[i]);}g=ng;}
+  var rem=[];for(i=0;i<ec;i++)rem.push(0);
+  data.forEach(function(d){var f=d^rem.shift();rem.push(0);for(var k=0;k<ec;k++)rem[k]^=mul(g[k+1],f);});
+  var cw=data.concat(rem),m=[],fn=[];for(i=0;i<N;i++){m.push([]);fn.push([]);for(j=0;j<N;j++){m[i].push(0);fn[i].push(0);}}
+  function set(r,c,v){m[r][c]=v?1:0;fn[r][c]=1;}
+  function finder(r,c){for(var y=-1;y<=7;y++)for(var xx=-1;xx<=7;xx++){var rr=r+y,cc=c+xx;if(rr<0||cc<0||rr>=N||cc>=N)continue;set(rr,cc,y>=0&&y<=6&&xx>=0&&xx<=6&&(y==0||y==6||xx==0||xx==6||(y>=2&&y<=4&&xx>=2&&xx<=4)));}}
+  finder(0,0);finder(0,N-7);finder(N-7,0);
+  for(i=8;i<N-8;i++){set(6,i,i%2==0);set(i,6,i%2==0);}
+  var a=N-7;if(V>=2)for(var y=-2;y<=2;y++)for(var z=-2;z<=2;z++)set(a+y,a+z,Math.max(Math.abs(y),Math.abs(z))!=1);
+  for(i=0;i<9;i++){fn[8][i]=1;fn[i][8]=1;}for(i=0;i<8;i++){fn[8][N-1-i]=1;fn[N-1-i][8]=1;}
+  var bi=0,tot=cw.length*8,up=true;
+  for(var col=N-1;col>0;col-=2){if(col==6)col--;for(var k=0;k<N;k++){var r=up?N-1-k:k;for(var d=0;d<2;d++){var c=col-d;if(fn[r][c])continue;var bit=bi<tot?(cw[bi>>3]>>(7-(bi&7)))&1:0;bi++;if((r+c)%2==0)bit^=1;m[r][c]=bit;}}up=!up;}
+  var rm=8;for(i=0;i<10;i++)rm=(rm<<1)^((rm>>9)*0x537);var fb=((8<<10)|rm)^0x5412;function fbit(n){return(fb>>n)&1;}
+  for(i=0;i<=5;i++)set(i,8,fbit(i));set(7,8,fbit(6));set(8,8,fbit(7));set(8,7,fbit(8));for(i=9;i<15;i++)set(8,14-i,fbit(i));
+  for(i=0;i<8;i++)set(8,N-1-i,fbit(i));for(i=8;i<15;i++)set(N-15+i,8,fbit(i));set(N-8,8,1);
+  return {n:N,m:m};}
+function drawQR(cv,q){var s=Math.floor(240/(q.n+8)),W=(q.n+8)*s;cv.width=W;cv.height=W;var x=cv.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,W,W);x.fillStyle='#000';for(var r=0;r<q.n;r++)for(var c=0;c<q.n;c++)if(q.m[r][c])x.fillRect((c+4)*s,(r+4)*s,s,s);}
+function visibleMsgs(){var q=(S.q||'').toLowerCase();return S.msgs.filter(function(m){var f=m.from||{};
+  if(q&&((f.name||'')+' '+(f.address||'')+' '+(m.subject||'')).toLowerCase().indexOf(q)<0)return false;
+  if(S.flt==='unread'&&m.seen)return false;if(S.flt==='codes'&&!findOtp((m.subject||'')+' '+(m.intro||'')))return false;return true;});}
+function hue(s){var h=0;for(var i=0;i<s.length;i++)h=(h*31+s.charCodeAt(i))%360;return h;}
+function renderList(){
+  updateQuick();var L=$('list');$('cnt').textContent=S.msgs.length?S.msgs.length:'';
+  if(S.err){var em=(S.errInfo&&S.errInfo.msg)||'Could not reach the mail service.';L.innerHTML='<div class="empty"><svg class="i"><use href="#i-info"/></svg><p>'+escapeHTML(em)+'<br>Tap Retry, or open Details.</p></div>';return;}
+  if(!S.msgs.length){L.innerHTML='<div class="empty"><div class="radar"><i></i><i></i><i></i><svg class="i"><use href="#i-mail"/></svg></div><b>Nothing yet.</b><p>Use the address above. New mail lands here the moment it arrives.</p></div>';return;}
+  var v=visibleMsgs();if(!v.length){L.innerHTML='<div class="empty"><p>No mail matches.</p></div>';return;}
+  L.innerHTML=v.map(function(m,ix){var f=m.from||{},n=f.name||f.address||'Unknown',h=hue(n),c=category(m.subject,m.intro),o=findOtp((m.subject||'')+' '+(m.intro||''));
+    return '<div class="msg" style="animation-delay:'+Math.min(ix,8)*45+'ms" data-id="'+escapeHTML(m.id)+'"><div class="av" style="--h:'+h+'">'+escapeHTML(n.charAt(0).toUpperCase())+'</div><div class="mb"><div class="m1"><b>'+escapeHTML(n)+'</b><span>'+escapeHTML(formatDate(m.createdAt))+'</span></div><div class="m2">'+escapeHTML(m.subject||'(no subject)')+'</div><div class="m3">'+escapeHTML(m.intro||'')+'</div><div class="tags"><i class="tag t-'+c+'">'+CATN[c]+'</i>'+(o?'<button class="otp" data-code="'+escapeHTML(o)+'">Code '+escapeHTML(o)+' · Copy</button>':'')+'</div></div>'+(m.seen?'':'<span class="dot"></span>')+'</div>';}).join('');
+}
+function extendTimer(){if(!S.token){showToast('No email yet','error');return;}S.exp=Date.now()+LIFE;S.expired=false;tick();showToast('Reminder extended','success');}
+function moveInd(){var b=document.querySelector('nav button.on'),i=$('ind');if(b&&i){i.style.width=b.offsetWidth+'px';i.style.transform='translateX('+b.offsetLeft+'px)';}}
+function show(v){['home','detail','about','diag','settings'].forEach(function(n){$('v-'+n).classList.toggle('on',n===v);});
+  var tab=v==='detail'?'home':(v==='diag'?'settings':v);document.querySelectorAll('nav button').forEach(function(b){b.classList.toggle('on',b.dataset.v===tab);});
+  document.querySelector('main').scrollTop=0;moveInd();setTimeout(moveInd,220);setTimeout(moveInd,450);}
+function setTheme(t){document.documentElement.setAttribute('data-theme',t);var m=document.querySelector('meta[name=theme-color]');if(m)m.setAttribute('content',{dark:'#0B0D17',amoled:'#000000',light:'#eef0fb'}[t]);
+  document.querySelectorAll('[data-th]').forEach(function(b){b.classList.toggle('on',b.dataset.th===t);});}
+function setSeg(attr,val){document.querySelectorAll('['+attr+']').forEach(function(b){b.classList.toggle('on',b.getAttribute(attr)===String(val));});}
+function setPriv(on){S.priv=on;document.body.classList.toggle('priv',on);$('privsw').setAttribute('aria-checked',on);$('privsw').classList.toggle('on',on);paintAddr();}
+function initApp(){
+  var t=store.get('theme');setTheme(t==='light'||t==='amoled'?t:'dark');
+  var sm=parseInt(store.get('sess'),10);if([10,20,30,60].indexOf(sm)>=0)LIFE=sm*60000;setSeg('data-sess',LIFE/60000);setPriv(store.get('priv')==='1');
+  document.querySelectorAll('[data-th]').forEach(function(b){b.onclick=function(){setTheme(b.dataset.th);store.set('theme',b.dataset.th);};});
+  document.querySelectorAll('[data-sess]').forEach(function(b){b.onclick=function(){LIFE=parseInt(b.dataset.sess,10)*60000;store.set('sess',b.dataset.sess);setSeg('data-sess',b.dataset.sess);if(S.token){S.exp=Date.now()+LIFE;S.expired=false;}tick();showToast('Session: '+b.dataset.sess+' min','success');};});
+  $('privsw').onclick=function(){var on=!S.priv;setPriv(on);store.set('priv',on?'1':'0');};
+  $('clr').onclick=function(){if(confirm('Reset RooMail settings (theme, session length, privacy mode) on this phone? Your current inbox is not affected.')){store.set('theme','');store.set('sess','');store.set('priv','');LIFE=600000;setTheme('dark');setSeg('data-sess',10);setPriv(false);tick();showToast('Settings reset','success');}};
+  $('ver').textContent=VER;$('ver3').textContent='RooMail v'+VER+' · Built by Roohu';
+  $('chg').onclick=function(){S.wantPre='';getNewEmail($('chg'));};$('del').onclick=function(){if(confirm('Delete this inbox and make a new one?'))deleteMail($('del'));};
+  $('copy').onclick=copyToClipboard;$('ext').onclick=extendTimer;$('ref').onclick=function(){checkInbox($('ref'),true);};
+  $('qr').onclick=function(){if(!S.addr){showToast('No email yet','error');return;}var q=qrMatrix(S.addr);if(!q){showToast('Address too long for QR','error');return;}drawQR($('qrc'),q);$('qra').textContent=S.priv?'Address hidden (privacy mode)':S.addr;$('qrm').classList.add('on');};
+  $('qrx').onclick=function(){$('qrm').classList.remove('on');};$('qrm').onclick=function(e){if(e.target===$('qrm'))$('qrm').classList.remove('on');};
+  $('qrcp').onclick=copyToClipboard;
+  $('q').oninput=function(){S.q=this.value;renderList();};
+  document.querySelectorAll('[data-f]').forEach(function(b){b.onclick=function(){S.flt=b.dataset.f;setSeg('data-f',S.flt);renderList();};});
+  $('back').onclick=function(){show('home');};$('dmsg').onclick=function(){deleteMessage($('dmsg'));};
+  $('dotp').onclick=function(){copyText($('dotp').dataset.code,'Code copied!');};
+  $('copyMail').onclick=function(){copyText('roohukhan01@gmail.com','Email copied!');};
+  $('bretry').onclick=function(){if(S.token&&!S.err)checkInbox(null,true);else getNewEmail();};
+  $('bdiag').onclick=function(){show('diag');showDiag();};$('opendiag').onclick=function(){show('diag');showDiag();};
+  $('dback').onclick=function(){show('settings');};$('runtest').onclick=function(){runTest($('runtest'));};$('copydiag').onclick=function(){copyText(diagText(),'Report copied!');};
+  window.addEventListener('offline',function(){setStatus('offline');});window.addEventListener('online',function(){if(S.err||!S.token)getNewEmail();else checkInbox();});
+  $('list').onclick=function(e){var o=e.target.closest('.otp');if(o){e.stopPropagation();copyText(o.dataset.code,'Code copied!');return;}var el=e.target.closest('.msg');if(el)openEmail(el.dataset.id);};
+  document.querySelectorAll('nav button').forEach(function(b){b.onclick=function(){show(b.dataset.v);};});
+  window.addEventListener('resize',moveInd);var raf=0;document.addEventListener('pointermove',function(e){if(raf)return;raf=requestAnimationFrame(function(){raf=0;var s=document.documentElement.style;s.setProperty('--mx',(e.clientX/innerWidth-.5).toFixed(3));s.setProperty('--my',(e.clientY/innerHeight-.5).toFixed(3));});});document.addEventListener('visibilitychange',function(){if(!document.hidden&&S.token)checkInbox();});
+  $('qotpb').onclick=function(){var c=$('qotpb').dataset.code;if(c)copyText(c,'Code copied!');};
+  $('cmk').onclick=function(){var p=$('cpre').value.trim().toLowerCase();if(p&&!/^[a-z0-9._-]{3,24}$/.test(p)){showToast('Name: 3-24 letters, numbers, . _ -','error');return;}S.wantPre=p;S.wantDom=$('cdom').value;show('home');getNewEmail($('cmk'));};
+  $('nuke').onclick=nuke;
+  var lastY=0,idle;document.querySelector('main').addEventListener('scroll',function(){var y=this.scrollTop,nv=document.querySelector('nav');if(y>lastY+4&&y>50)nv.classList.add('mini');else if(y<lastY-4)nv.classList.remove('mini');lastY=y;clearTimeout(idle);setTimeout(moveInd,380);idle=setTimeout(function(){nv.classList.remove('mini');setTimeout(moveInd,380);},900);});
+  updHealth();setInterval(tick,1000);tick();setTimeout(moveInd,60);
+  var ready=false,minDone=false,hid=false;
+  function finish(){if(hid)return;hid=true;var b=$('sbar');b.style.animation='none';b.style.width='100%';setTimeout(function(){$('splash').classList.add('fade');},350);}
+  function maybe(){if(ready&&minDone)finish();}
+  setTimeout(function(){minDone=true;maybe();},2200);setTimeout(finish,6000);
+  getNewEmail().then(function(){ready=true;maybe();},function(){ready=true;maybe();});
+}
+
+function buzz(){try{var H=window.Capacitor&&window.Capacitor.Plugins&&window.Capacitor.Plugins.Haptics;if(H&&H.impact){H.impact({style:'LIGHT'});return;}if(navigator.vibrate)navigator.vibrate(12);}catch(e){}}
+function updHealth(){var e=$('health');if(!e)return;e.className='health '+S.net;e.textContent=({online:'Live',offline:'Offline',reconnecting:'Reconnecting',error:'No connection'}[S.net]||'')+((S.net==='online'&&S.ms)?' · '+S.ms+' ms':'');$('hero').classList.toggle('listen',S.net==='online'&&!!S.token);}
+function fillDomains(){var s=$('cdom');if(!s||!S.domains.length)return;var cur=s.value;s.innerHTML='<option value="">Automatic domain</option>'+S.domains.map(function(d){return '<option>'+escapeHTML(d)+'</option>';}).join('');s.value=cur;}
+function extractLinks(s){var out=[],seen={},re=/https?:\/\/[^\s"'<>)\]]+/gi,m;s=String(s||'').replace(/&amp;/g,'&');
+  while((m=re.exec(s))&&out.length<6){var u=m[0].replace(/[.,;]+$/,'');if(seen[u])continue;seen[u]=1;var hn='';try{hn=new URL(u).hostname;}catch(e){continue;}
+    var w=/^\d{1,3}(\.\d{1,3}){3}$/.test(hn)||hn.indexOf('xn--')>=0||u.indexOf('http://')===0||hn.split('.').length>4;out.push({u:u,h:hn,w:w});}return out;}
+function renderLinks(L){var box=$('dlinks'),c=$('dll');c.innerHTML='';box.hidden=!L.length;
+  L.forEach(function(x){var r=document.createElement('div');r.className='lkr';var t=document.createElement('div');t.className='lkt';var b=document.createElement('b');b.textContent=x.h;var s=document.createElement('small');s.textContent=x.w?'Check carefully — unusual address':(x.u.length>48?x.u.slice(0,48)+'…':x.u);if(x.w)s.className='warn';t.appendChild(b);t.appendChild(s);
+    var bt=document.createElement('button');bt.className='sm';bt.textContent='Open';bt.onclick=function(){if(confirm('Open '+x.h+'?\n\n'+(x.w?'Warning: this address looks unusual. ':'')+'It opens in your browser.')){var a=document.createElement('a');a.href=x.u;a.target='_blank';a.rel='noopener noreferrer';document.body.appendChild(a);a.click();document.body.removeChild(a);}};
+    r.appendChild(t);r.appendChild(bt);c.appendChild(r);});}
+function updateQuick(){var q=$('qotp'),best=null;for(var i=0;i<S.msgs.length&&!best;i++){var m=S.msgs[i],o=findOtp((m.subject||'')+' '+(m.intro||''));if(o)best={c:o,f:(m.from&&(m.from.name||m.from.address))||'Unknown'};}
+  q.hidden=!best;if(best){$('qotpc').textContent=best.c;$('qotps').textContent='from '+best.f+' (found in preview)';$('qotpb').dataset.code=best.c;}}
+async function nuke(){if(!confirm('Nuke everything? This deletes the current inbox at the mail service (if it accepts), clears all RooMail data on this phone and starts fresh.'))return;
+  if(S.ctl)S.ctl.abort();stopPoll();if(S.accId&&S.token){try{await api('/accounts/'+S.accId,{method:'DELETE',auth:true,retries:0,signal:new AbortController().signal});}catch(e){}}
+  try{localStorage.clear();}catch(e){}try{sessionStorage.clear();}catch(e){}
+  S.msgs=[];S.token='';S.accId='';S.addr='';S.q='';S.flt='all';S.wantPre='';S.wantDom='';LOG.length=0;LIFE=600000;$('q').value='';$('cpre').value='';
+  setTheme('dark');setSeg('data-sess',10);setSeg('data-f','all');setPriv(false);S.busy=false;show('home');showToast('Everything cleared','success');await getNewEmail();}
+function reduced(){try{return !!(window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches);}catch(e){return false;}}
+var scTm=null;
+function paintAddr(wait,anim){var a=$('addr'),t=S.shown||'';a.className=wait?'pulse':'';var i=t.indexOf('@');clearInterval(scTm);
+  if(i<0){a.textContent=t;return;}
+  var u=t.slice(0,i),d=t.slice(i);if(S.priv)u=new Array(u.length+1).join('•');
+  a.innerHTML='<span class="u"></span><span class="d">'+escapeHTML(d)+'</span>';var us=a.firstChild||{};
+  if(!anim||S.priv||reduced()){us.textContent=u;return;}
+  var n=0,ch='abcdefghijklmnopqrstuvwxyz0123456789',tot=14;us.textContent=u.replace(/./g,'·');
+  scTm=setInterval(function(){n++;var s='';for(var k=0;k<u.length;k++)s+=(k<u.length*n/tot-.5)?u[k]:ch[Math.floor(Math.random()*ch.length)];us.textContent=n>=tot?u:s;if(n>=tot)clearInterval(scTm);},45);}
+function setAddr(t,wait){S.shown=t;paintAddr(wait,!wait&&t.indexOf('@')>0);}
+function tick(){var left=S.token?S.exp-Date.now():LIFE,t=$('time');t.textContent=fmt(left);t.className=(left<60000&&S.token)?'low':'';$('ring').style.width=Math.max(0,Math.min(100,left/LIFE*100))+'%';
+  if(S.token&&left<=0&&!S.expired){S.expired=true;showToast('Timer expired! Extend or get new email.','error');}}
+window.__roo={extractLinks:extractLinks,updHealth:updHealth,nuke:nuke,findOtp:findOtp,category:category,qrMatrix:qrMatrix,visibleMsgs:visibleMsgs,classify:classify,request:request,LOG:LOG,diagText:diagText,escapeHTML:escapeHTML,formatDate:formatDate,fmt:fmt,S:S,getNewEmail:getNewEmail,checkInbox:checkInbox,openEmail:openEmail,deleteMail:deleteMail,extendTimer:extendTimer,tick:tick};
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',initApp);else initApp();
+})();
+</script>
+</body>
+</html>
